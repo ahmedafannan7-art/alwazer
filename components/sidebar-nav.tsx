@@ -1,14 +1,18 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
-  LayoutDashboard, Users, FileText, Receipt,
+  LayoutDashboard, Users, FileText,
   LogOut, Wallet, Menu, X, Box, ChevronRight, ChevronLeft
 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { signOut } from "firebase/auth"
+import { auth } from "@/lib/firebase"
+import { useAuth } from "@/lib/auth-context"
+import { toast } from "sonner"
 
 const navItems = [
   { href: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
@@ -20,13 +24,19 @@ const navItems = [
 
 export function SidebarNav() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false) // حالة الطي
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+  const { user } = useAuth()
 
-  function handleLogout() {
-    localStorage.removeItem("acc_registered_ip")
-    localStorage.removeItem("acc_override_ip")
-    window.location.href = "/login"
+  async function handleLogout() {
+    try {
+      await signOut(auth)
+      toast.success("تم تسجيل الخروج")
+      router.replace("/login")
+    } catch {
+      toast.error("حدث خطأ أثناء تسجيل الخروج")
+    }
   }
 
   const NavContent = ({ isMobile = false }) => (
@@ -36,7 +46,7 @@ export function SidebarNav() {
         <div className={cn("flex items-center justify-center rounded-2xl bg-blue-600 text-white font-black shadow-lg shadow-blue-900 shrink-0 transition-all duration-300", isCollapsed && !isMobile ? "w-10 h-10 text-lg" : "w-12 h-12 text-xl")}>م</div>
         {(!isCollapsed || isMobile) && (
           <div className="overflow-hidden whitespace-nowrap animate-in fade-in duration-300">
-            <h2 className="text-lg font-black text-white"> حسابات </h2>
+            <h2 className="text-lg font-black text-white">حسابات</h2>
             <p className="text-xs text-blue-400 font-bold">مطبعة الوزير</p>
           </div>
         )}
@@ -69,8 +79,13 @@ export function SidebarNav() {
         </ul>
       </nav>
 
-      {/* تسجيل الخروج */}
-      <div className="border-t border-slate-800 p-4">
+      {/* معلومات المستخدم + تسجيل الخروج */}
+      <div className="border-t border-slate-800 p-4 flex flex-col gap-2">
+        {(!isCollapsed || isMobile) && user?.email && (
+          <p className="text-xs text-slate-500 truncate px-1 text-center" dir="ltr">
+            {user.email}
+          </p>
+        )}
         <button
           onClick={handleLogout}
           title={isCollapsed && !isMobile ? "تسجيل الخروج" : ""}
@@ -90,17 +105,14 @@ export function SidebarNav() {
     <>
       <div className="fixed top-0 right-0 left-0 z-40 flex items-center justify-between border-b bg-white px-4 py-3 lg:hidden shadow-sm" dir="rtl">
         <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}><Menu className="h-6 w-6" /></Button>
-        <h1 className="text-sm font-black text-slate-800">مطبعة الوزير </h1>
+        <h1 className="text-sm font-black text-slate-800">مطبعة الوزير</h1>
       </div>
 
-      {/* قائمة الكمبيوتر - Sticky عشان تزق المحتوى */}
       <aside className={cn(
         "sticky top-0 h-screen z-30 hidden lg:flex flex-col transition-all duration-300 ease-in-out border-l border-slate-800 shrink-0",
         isCollapsed ? "w-20" : "w-64"
       )}>
         <NavContent />
-        
-        {/* زرار الطي السحري */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="absolute -left-3.5 top-10 bg-blue-600 text-white p-1.5 rounded-full shadow-lg hover:bg-blue-500 transition-all z-50 focus:outline-none"
@@ -109,7 +121,6 @@ export function SidebarNav() {
         </button>
       </aside>
 
-      {/* قائمة الموبايل */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />

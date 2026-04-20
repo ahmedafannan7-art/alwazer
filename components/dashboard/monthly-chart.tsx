@@ -33,7 +33,7 @@ export function MonthlyChart({ invoices, expenses }: MonthlyChartProps) {
 
     const monthRevenue = invoices
       .filter((inv) => inv.createdAt.startsWith(monthKey))
-      .reduce((sum, inv) => sum + inv.paidAmount, 0)
+      .reduce((sum, inv) => sum + inv.totalPrice, 0)
 
     const monthExpenses = expenses
       .filter((exp) => exp.date.startsWith(monthKey))

@@ -12,48 +12,23 @@ interface StatsCardsProps {
 export function StatsCards({ invoices, expenses }: StatsCardsProps) {
   const today = new Date().toISOString().split("T")[0]
 
-  const totalRevenue = invoices.reduce((sum, inv) => sum + inv.paidAmount, 0)
+  const totalRevenue = invoices.reduce((sum, inv) => sum + inv.totalPrice, 0)
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0)
   const netProfit = totalRevenue - totalExpenses
-  const unpaidInvoices = invoices.filter((inv) => inv.status !== "paid").length
 
   const todayRevenue = invoices
     .filter((inv) => inv.createdAt.startsWith(today))
-    .reduce((sum, inv) => sum + inv.paidAmount, 0)
+    .reduce((sum, inv) => sum + inv.totalPrice, 0)
 
   const todayExpenses = expenses
     .filter((exp) => exp.date === today)
     .reduce((sum, exp) => sum + exp.amount, 0)
 
   const stats = [
-    {
-      label: "اجمالي الايرادات",
-      value: totalRevenue.toLocaleString("ar-EG"),
-      today: todayRevenue.toLocaleString("ar-EG"),
-      icon: DollarSign,
-      color: "text-success bg-success/10",
-    },
-    {
-      label: "اجمالي المصروفات",
-      value: totalExpenses.toLocaleString("ar-EG"),
-      today: todayExpenses.toLocaleString("ar-EG"),
-      icon: TrendingDown,
-      color: "text-destructive bg-destructive/10",
-    },
-    {
-      label: "صافي الربح",
-      value: netProfit.toLocaleString("ar-EG"),
-      today: (todayRevenue - todayExpenses).toLocaleString("ar-EG"),
-      icon: TrendingUp,
-      color: netProfit >= 0 ? "text-success bg-success/10" : "text-destructive bg-destructive/10",
-    },
-    {
-      label: "فواتير غير مدفوعة",
-      value: unpaidInvoices.toString(),
-      today: null,
-      icon: FileText,
-      color: "text-warning bg-warning/10",
-    },
+    { label: "اجمالي الايرادات", value: totalRevenue.toLocaleString("ar-EG"), today: todayRevenue.toLocaleString("ar-EG"), icon: DollarSign, color: "text-green-600 bg-green-50" },
+    { label: "اجمالي المصروفات", value: totalExpenses.toLocaleString("ar-EG"), today: todayExpenses.toLocaleString("ar-EG"), icon: TrendingDown, color: "text-red-600 bg-red-50" },
+    { label: "صافي الربح", value: netProfit.toLocaleString("ar-EG"), today: (todayRevenue - todayExpenses).toLocaleString("ar-EG"), icon: TrendingUp, color: netProfit >= 0 ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50" },
+    { label: "إجمالي الفواتير", value: invoices.length.toString(), today: null, icon: FileText, color: "text-blue-600 bg-blue-50" },
   ]
 
   return (
@@ -71,9 +46,7 @@ export function StatsCards({ invoices, expenses }: StatsCardsProps) {
                 {stat.today !== null && <span className="text-xs text-muted-foreground font-normal mr-1">ج.م</span>}
               </p>
               {stat.today !== null && (
-                <p className="text-xs text-muted-foreground">
-                  اليوم: {stat.today} ج.م
-                </p>
+                <p className="text-xs text-muted-foreground">اليوم: {stat.today} ج.م</p>
               )}
             </div>
           </CardContent>

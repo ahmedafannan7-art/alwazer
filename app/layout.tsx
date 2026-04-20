@@ -1,30 +1,32 @@
-import type { Metadata } from "next";
-// استيراد خط Cairo المودرن من جوجل
-import { Cairo } from "next/font/google";
-// @ts-ignore: side-effect import of CSS file without ambient module declaration
-import "./globals.css";
+import type { Metadata } from "next"
+import { Cairo } from "next/font/google"
+// @ts-ignore
+import "./globals.css"
+import { AuthProvider } from "@/lib/auth-context"
+import { Toaster } from "@/components/ui/sonner"
 
-// إعداد الخط بكل الأوزان المطلوبة عشان العناوين تطلع فخمة
-const cairo = Cairo({ 
+const cairo = Cairo({
   subsets: ["arabic", "latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
-  display: 'swap',
-});
+  display: "swap",
+})
 
 export const metadata: Metadata = {
-  title: "نظام المحاسبة - مطبعة الوزير ",
+  title: "نظام المحاسبة - مطبعة الوزير",
   description: "نظام إدارة المطابع الشامل",
-};
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ar" dir="rtl">
-      {/* تطبيق الخط الجديد على جسم الموقع بالكامل */}
-      <body className={cairo.className}>{children}</body>
+      <body className={cairo.className}>
+        <AuthProvider>
+          {children}
+          <Toaster position="top-center" richColors />
+        </AuthProvider>
+      </body>
     </html>
-  );
+  )
 }

@@ -1,41 +1,20 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/lib/auth-context"
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
   const router = useRouter()
-  const [authorized, setAuthorized] = useState(false)
-  const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    const registeredIP = localStorage.getItem("acc_registered_ip")
-    if (!registeredIP) {
+    if (!loading && !user) {
       router.replace("/login")
-      return
     }
+  }, [user, loading, router])
 
-    fetch("/api/ip")
-      .then((res) => res.json())
-      .then((data) => {
-        const overrideIP = localStorage.getItem("acc_override_ip")
-        const currentIP = data.ip
-        const allowedIP = overrideIP || registeredIP
-
-        if (currentIP === allowedIP || registeredIP === "any") {
-          setAuthorized(true)
-        } else {
-          router.replace("/login")
-        }
-      })
-      .catch(() => {
-        // If IP check fails, allow access (offline mode)
-        setAuthorized(true)
-      })
-      .finally(() => setChecking(false))
-  }, [router])
-
-  if (checking) {
+  if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -46,7 +25,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (!authorized) return null
+  if (!user) return null
 
   return <>{children}</>
 }

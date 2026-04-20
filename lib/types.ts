@@ -8,28 +8,33 @@ export interface Client {
 }
 
 export interface InvoiceItem {
-  service: string
-  description: string
-  quantity: number
+  name: string
+  qty: number
   unitPrice: number
+  cost: number
   total: number
+  paperSupplierId?: string
+  printSupplierId?: string
+  zinkSupplierId?: string
+  embossSupplierId?: string
+  laminationSupplierId?: string
+  spotSupplierId?: string
+  rigaSupplierId?: string
+  cuttingSupplierId?: string
+  diesSupplierId?: string
 }
 
 export interface Invoice {
   id: string
   invoiceNumber: string
-  clientId: string
+  customerId: string
   clientName: string
-  serviceType: "printing" | "social-media"
+  date: string
   items: InvoiceItem[]
-  subtotal: number
-  discount: number
-  tax: number
-  total: number
-  status: "paid" | "unpaid" | "partial"
-  paidAmount: number
+  totalPrice: number
+  totalCost: number
   createdAt: string
-  notes: string
+  notes?: string
 }
 
 export type ExpenseCategory = "rent" | "salaries" | "materials" | "ads" | "other"
@@ -51,13 +56,6 @@ export interface PrintingPrice {
   notes: string
 }
 
-export interface PrintingAddon {
-  id: string
-  name: string
-  price: number
-  notes: string
-}
-
 export interface SocialMediaPackage {
   id: string
   name: string
@@ -66,8 +64,41 @@ export interface SocialMediaPackage {
   features: string[]
 }
 
+export interface Supplier {
+  id: string
+  name: string
+  categoryId: string
+  categoryName: string
+  createdAt: string
+}
+
+export interface SupplierTransaction {
+  id: string
+  supplierId: string
+  supplierName: string
+  supplierCategoryId: string
+  supplierCategoryName: string
+  amount: number
+  date: string
+  type: "تنزيل" | "إضافة_مديونية" | "تكلفة_فاتورة" | "سحب_شغل"
+  method?: string
+  notes?: string
+  invoiceId?: string
+}
+
+export interface ClientTransaction {
+  id: string
+  clientId: string
+  clientName: string
+  amount: number
+  date: string
+  type: "تنزيل" | "فاتورة"
+  method?: string
+  notes?: string
+  invoiceId?: string
+}
+
 export interface AppSettings {
-  registeredIP: string
   companyName: string
   companyPhone: string
   companyAddress: string
@@ -82,8 +113,21 @@ export const EXPENSE_CATEGORIES: Record<ExpenseCategory, string> = {
   other: "اخرى",
 }
 
-export const INVOICE_STATUS_LABELS: Record<Invoice["status"], string> = {
-  paid: "مدفوعة",
-  unpaid: "غير مدفوعة",
-  partial: "مدفوعة جزئيا",
+export const SUPPLIER_CATEGORIES = [
+  { id: "printing", name: "الطباعة" },
+  { id: "paper", name: "الورق" },
+  { id: "zincs", name: "الزنكات" },
+  { id: "emboss", name: "البصمة" },
+  { id: "lamination", name: "السلوفان" },
+  { id: "spot", name: "السبوت" },
+  { id: "riga", name: "الريجا" },
+  { id: "cutting", name: "التكسير" },
+  { id: "dies", name: "الإسطمبات" },
+]
+
+export const DEFAULT_SETTINGS: AppSettings = {
+  companyName: "مطبعة الوزير",
+  companyPhone: "01000000000",
+  companyAddress: "جمهورية مصر العربية",
+  taxRate: 0,
 }
